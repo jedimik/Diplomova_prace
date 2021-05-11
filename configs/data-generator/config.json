@@ -1,0 +1,24 @@
+{
+    "data":{
+        "dataFile": "exp_proud.csv",
+        "generate": true,
+        "outputName": "generated.txt",
+        "datalength": 10000,
+        "maxvalue": 200,
+        "minvalue": 100
+    },
+
+    "database":{
+        "host": "localhost",
+        "port": 8086,
+        "user": "root",
+        "pass": "root",
+        "database": "diplomka"
+    },
+
+    "Predictor":{
+        "send": true,
+        "filepath": "/fifo/dataIN"
+    }
+
+}

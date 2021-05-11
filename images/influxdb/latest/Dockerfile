@@ -1,0 +1,3 @@
+ARG INFLUXDB_TAG
+FROM influxdb:1.7.11
+

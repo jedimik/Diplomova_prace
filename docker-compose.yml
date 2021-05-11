@@ -1,0 +1,138 @@
+version: '3'
+services:
+  influxdb:
+    # Full tag list: https://hub.docker.com/r/library/influxdb/tags/
+    build:
+      context: ./images/influxdb/
+      dockerfile: ./latest/Dockerfile
+      args:
+        INFLUXDB_TAG: latest
+    image: "influxdb"
+    volumes:
+      # Mount for influxdb data directory
+      - ./influxdb/data:/var/lib/influxdb
+      # Mount for influxdb configuration
+      - ./influxdb/config/:/etc/influxdb/
+    ports:
+      # The API for InfluxDB is served on port 8086
+      - "8086:8086"
+      - "8082:8082"
+      # UDP Port
+      - "8089:8089/udp"
+
+  telegraf:
+    # Full tag list: https://hub.docker.com/r/library/telegraf/tags/
+    build:
+      context: ./images/telegraf/
+      dockerfile: ./latest/Dockerfile
+      args:
+        TELEGRAF_TAG: latest
+    image: "telegraf"
+    environment:
+      HOSTNAME: "telegraf-getting-started"
+    # Telegraf requires network access to InfluxDB
+    links:
+      - influxdb
+    volumes:
+      # Mount for telegraf configuration
+      - ./telegraf/:/etc/telegraf/
+      # Mount for Docker API access
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - influxdb
+
+  kapacitor:
+  # Full tag list: https://hub.docker.com/r/library/kapacitor/tags/
+    build:
+      context: ./images/kapacitor/
+      #dockerfile: ./${TYPE}/Dockerfile
+      dockerfile: ./latest/Dockerfile
+      args:
+        KAPACITOR_TAG: latest
+    image: "kapacitor"
+    volumes:
+      # Mount for kapacitor data directory
+      - ./kapacitor/data/:/var/lib/kapacitor
+      # Mount for kapacitor configuration
+      - ./kapacitor/config/:/etc/kapacitor/
+    # Kapacitor requires network access to Influxdb
+    links:
+      - influxdb
+    depends_on:
+      - influxdb
+    ports:
+      # The API for Kapacitor is served on port 9092
+      - "9092:9092"
+
+  chronograf:
+    # Full tag list: https://hub.docker.com/r/library/chronograf/tags/
+    build:
+      context: ./images/chronograf
+      dockerfile: ./latest/Dockerfile
+      args:
+        CHRONOGRAF_TAG: latest
+    image: "chrono_config"
+    environment:
+      RESOURCES_PATH: "/usr/share/chronograf/resources"
+    volumes:
+      # Mount for chronograf database
+      - ./chronograf/data/:/var/lib/chronograf/
+    links:
+      # Chronograf requires network access to InfluxDB and Kapacitor
+      - influxdb
+      - kapacitor
+    ports:
+      # The WebUI for Chronograf is served on port 8888
+      - "8888:8888"
+    depends_on:
+      - kapacitor
+      - influxdb
+      - telegraf
+
+  generator:
+    build:
+      context: ./data-generator
+      dockerfile: ./Dockerfile
+    #image: "data_generator"
+    volumes:
+      - ./configs/data-generator:/app/config
+      - gen-pred:/fifo
+    network_mode: "host"
+    depends_on:
+      - kapacitor
+      - influxdb
+
+  predictor:
+    build:
+      context: ./data-predictor
+      dockerfile: ./Dockerfile
+    #image: "data_generator"
+    volumes:
+      - ./configs/data-predictor:/app/config
+      - gen-pred:/fifo
+    network_mode: "host"
+    depends_on:
+      - generator
+      - influxdb
+
+  agent:
+    image: portainer/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+
+  portainer:
+    image: portainer/portainer-ce
+    restart: always
+    ports:
+      - "9000:9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes: 
+  gen-pred:
+  portainer_data:
+
+
