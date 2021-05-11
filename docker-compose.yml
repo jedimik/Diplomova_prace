@@ -97,7 +97,6 @@ services:
     volumes:
       - ./configs/data-generator:/app/config
       - gen-pred:/fifo
-    network_mode: "host"
     depends_on:
       - kapacitor
       - influxdb
@@ -110,7 +109,6 @@ services:
     volumes:
       - ./configs/data-predictor:/app/config
       - gen-pred:/fifo
-    network_mode: "host"
     depends_on:
       - generator
       - influxdb

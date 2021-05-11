@@ -8,7 +8,7 @@ data:
 
 database:
   enabled: true
-  host: localhost
+  host: 'influxdb'
   port: 8086
   user: 'root'
   pass: 'root'

@@ -2,12 +2,7 @@ version: '3.5'
 services:
   influxdb:
     # Full tag list: https://hub.docker.com/r/library/influxdb/tags/
-    build:
-      context: ./images/influxdb/
-      dockerfile: ./latest/Dockerfile
-      args:
-        INFLUXDB_TAG: latest
-    image: "influxdb"
+    image: influxdb:1.7.11
     volumes:
       # Mount for influxdb data directory
       - ./influxdb/data:/var/lib/influxdb
@@ -22,12 +17,7 @@ services:
 
   telegraf:
     # Full tag list: https://hub.docker.com/r/library/telegraf/tags/
-    build:
-      context: ./images/telegraf/
-      dockerfile: ./latest/Dockerfile
-      args:
-        TELEGRAF_TAG: latest
-    image: "telegraf"
+    image: telegraf:latest
     environment:
       HOSTNAME: "telegraf-getting-started"
     # Telegraf requires network access to InfluxDB
@@ -41,13 +31,7 @@ services:
 
   kapacitor:
   # Full tag list: https://hub.docker.com/r/library/kapacitor/tags/
-    build:
-      context: ./images/kapacitor/
-      #dockerfile: ./${TYPE}/Dockerfile
-      dockerfile: ./latest/Dockerfile
-      args:
-        KAPACITOR_TAG: latest
-    image: "kapacitor"
+    image: kapacitor:latest
     volumes:
       # Mount for kapacitor data directory
       - ./kapacitor/data/:/var/lib/kapacitor
@@ -62,12 +46,7 @@ services:
 
   chronograf:
     # Full tag list: https://hub.docker.com/r/library/chronograf/tags/
-    build:
-      context: ./images/chronograf
-      dockerfile: ./latest/Dockerfile
-      args:
-        CHRONOGRAF_TAG: latest
-    image: "chrono_config"
+    image: chronograf:latest
     environment:
       RESOURCES_PATH: "/usr/share/chronograf/resources"
     volumes:
@@ -82,27 +61,19 @@ services:
       - telegraf
 
   generator:
-    build:
-      context: ./data-generator
-      dockerfile: ./Dockerfile
-    image: "data_generator"
+    image: jedimik/dp_generator:latest
     volumes:
       - ./configs/data-generator:/app/config
       - gen-pred:/fifo
-    network_mode: "host"
     depends_on:
       - kapacitor
       - influxdb
 
   predictor:
-    build:
-      context: ./data-predictor
-      dockerfile: ./Dockerfile
-    image: "data_generator"
+    image: jedimik/dp_predictor:latest
     volumes:
       - ./configs/data-predictor:/app/config
       - gen-pred:/fifo
-    network_mode: "host"
     depends_on:
       - generator
       - influxdb
@@ -115,7 +86,6 @@ services:
 
   portainer:
     image: portainer/portainer-ce
-    restart: always
     ports:
       - "9000:9000"
     command: -H unix:///var/run/docker.sock
@@ -126,5 +96,6 @@ services:
 volumes: 
   gen-pred:
   portainer_data:
+
 
 
