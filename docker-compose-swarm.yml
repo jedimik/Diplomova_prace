@@ -63,8 +63,11 @@ services:
   generator:
     image: jedimik/dp_generator:latest
     volumes:
-      - ./configs/data-generator:/app/config
+      - ./configs/data-generator:/app/config/
       - gen-pred:/fifo
+    configs:
+      - source: generator_conf
+        target: /app/config/config.json
     depends_on:
       - kapacitor
       - influxdb
@@ -72,8 +75,11 @@ services:
   predictor:
     image: jedimik/dp_predictor:latest
     volumes:
-      - ./configs/data-predictor:/app/config
+      - ./configs/data-predictor:/app/config/
       - gen-pred:/fifo
+    configs:
+      - source: predictor_conf
+        target: /app/config/config.yml
     depends_on:
       - generator
       - influxdb
@@ -92,10 +98,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+  
+configs:
+  generator_conf:
+    file: ./configs/data-generator/config.json
+  predictor_conf:
+    file: ./configs/data-predictor/config.yaml
 
 volumes: 
   gen-pred:
   portainer_data:
-
-
-

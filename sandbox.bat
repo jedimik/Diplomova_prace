@@ -16,7 +16,7 @@ IF %ERRORLEVEL% == 0 SET interactive=0
 REM Enter attaches users to a shell in the desired container
 IF "%1"=="enter" (
     IF "%2"=="" (
-        ECHO sandbox enter ^(influxdb^|^|chronograf^|^|kapacitor^|^|telegraf^)
+        ECHO sandbox enter ^(influxdb^|^|chronograf^|^|kapacitor^|^|telegraf^|^|predictor^|^|generator^)
         GOTO End
     )
     IF "%2"=="influxdb" (
@@ -37,6 +37,16 @@ IF "%1"=="enter" (
     IF "%2"=="telegraf" (
         ECHO Entering ^/bin^/bash session in the telegraf container...
         docker-compose exec telegraf /bin/bash
+        GOTO End
+    )
+    IF "%2"=="predictor" (
+        ECHO Entering ^/bin^/bash session in the predictor container...
+        docker-compose exec predictor /bin/bash
+        GOTO End
+    )
+    IF "%2"=="generator" (
+        ECHO Entering ^/bin^/bash session in the generator container...
+        docker-compose exec generator /bin/bash
         GOTO End
     )
 )
@@ -71,33 +81,40 @@ IF "%1"=="logs" (
 
 
 IF "%1"=="up" (
-    IF "%2"=="-nightly" (
-        ECHO Spinning up nightly Docker Images...
-        ECHO If this is your first time starting sandbox this might take a minute...
-        SET TYPE=nightly
-        SET INFLUXDB_TAG=nightly
-        SET CHRONOGRAF_TAG=nightly
-        docker-compose up -d --build
-        ECHO Opening tabs in browser...
-        timeout /t 3 /nobreak > NUL
-        START "" http://localhost:8888
-        START "" http://localhost:9000
-        GOTO End  
-    ) ELSE (
-        ECHO Spinning up latest, stable Docker Images...
-        ECHO If this is your first time starting sandbox this might take a minute...
-        docker-compose up -d --build
-        ECHO Opening tabs in browser...
-        timeout /t 3 /nobreak > NUL
-        START "" http://localhost:8888
-        START "" http://localhost:9000
-        GOTO End
-    )
+    ECHO Spinning up latest, stable Docker Images...
+    ECHO If this is your first time starting system this might take a minute...
+    docker-compose up -d --build
+    ECHO Opening tabs in browser...
+    timeout /t 3 /nobreak > NUL
+    START "" http://localhost:8888
+    START "" http://localhost:9000
+    GOTO End
+
+)
+
+IF "%1"=="upswarm" (
+    ECHO Spinning up latest, stable Docker Images...
+    ECHO If this is your first time starting system this might take a minute...
+    docker swarm init
+    docker stack deploy --compose-file docker-compose-swarm.yml diplomka
+    ECHO Opening tabs in browser...
+    timeout /t 3 /nobreak > NUL
+    START "" http://localhost:9000
+    START "" http://localhost:8888
+    GOTO End
+    
 )
 
 IF "%1"=="down" (
-    ECHO Stopping and removing running sandbox containers...
+    ECHO Stopping and removing running system containers...
     docker-compose down
+    GOTO End
+)
+
+IF "%1"=="downswarm" (
+    ECHO Stopping and removing swarm containers with swarm mode...
+    docker stack rm diplomka
+    docker swarm leave --force
     GOTO End
 )
 
@@ -136,28 +153,22 @@ IF "%1"=="flux" (
     GOTO End
 )
 
-IF "%1"=="rebuild-docs" (
-    echo Rebuilding documentation container...
-    docker build -t sandbox_documentation documentation\  >NUL 2>NUL
-    echo "Restarting..."
-    docker-compose down >NUL 2>NUL
-    docker-compose up -d --build >NUL 2>NUL
-    GOTO End
-)
-
+IF "%1"=="help" (
 ECHO sandbox commands:
-ECHO   up           -^> spin up the sandbox environment
-ECHO   down         -^> tear down the sandbox environment
-ECHO   restart      -^> restart the sandbox
+ECHO   up           -^> spin up the system environment in compose.
+ECHO   down         -^> tear down the system environment from compose.
+ECHO   upswarm      -^> Initialize a swarm cluster, deploy system stack.
+ECHO   downswarm    -^> Tear down system stack, and leave swarm cluster.
+ECHO   restart      -^> restart the system environment (just in compose)
 ECHO   influxdb     -^> attach to the influx cli
 ECHO   flux         -^> attach to the flux REPL
 ECHO.
-ECHO   enter ^(influxdb^|^|kapacitor^|^|chronograf^|^|telegraf^) -^> enter the specified container
-ECHO   logs  ^(influxdb^|^|kapacitor^|^|chronograf^|^|telegraf^) -^> stream logs for the specified container
+ECHO   enter ^(influxdb^|^|kapacitor^|^|chronograf^|^|telegraf^|^|generator^|^|predictor^) -^> enter the specified container
+ECHO   logs  ^(influxdb^|^|kapacitor^|^|chronograf^|^|telegraf^|^|generator^|^|predictor^) -^> stream logs for the specified container
 ECHO.
-ECHO   delete-data  -^> delete all data created by the TICK Stack
+ECHO   delete-data  -^> delete all data created by in production
 ECHO   docker-clean -^> stop and remove all running docker containers and images
-ECHO   rebuild-docs -^> rebuild the documentation image
+)
 
 :End
 IF "%interactive%"=="0" PAUSE

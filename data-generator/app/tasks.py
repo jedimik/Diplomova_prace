@@ -10,7 +10,7 @@ from datetime import datetime
 
 class Configuration(object):
         
-    def load_config(self,filepath=None):    
+    def load_config(self,filepath=None):    #Load config json or yaml
         filepath = filepath or "config/config.yaml"
         file, ext = os.path.splitext(filepath)
         if ext==".yaml":
@@ -41,21 +41,21 @@ class Generator(Configuration): #For generating simple values
     def main(self,config,datapath):
         self.generate(int(config['minvalue']),int(config['maxvalue']),int(config['datalength']),config['outputName'])
 
-class LoadData(Configuration):
+class LoadData(Configuration): # Load data for generating
     def load_data(self,func,config,datapath=None):
         dataConf=config['data']
         dbConf=config['database']
         fifoConf=config['Predictor']
         db=DBconnect().LoadDB(dbConf)   
-        if dataConf['generate']==True and datapath is None:
+        if dataConf['generate']==True and datapath is None: #Generate new data and load them
             Generator().main(dataConf,datapath="data/")
             return self.load_data_from_file(func,db,fifoConf, datapath="data/"+dataConf['outputName']) 
-        elif dataConf['generate']==False and datapath is None:
+        elif dataConf['generate']==False and datapath is None: #Load data from datapath 
              return self.load_data_from_file(func,db,fifoConf, datapath="data/outputData") 
-        elif not datapath:
+        elif not datapath: # Get data from stdin
             return self.load_data_from_stdin(func,db,fifoConf)
-        else:
-            return self.load_data_from_file(func,datapath,fifoConf) 
+        else:   
+            pass
 
     def load_data_from_file(self,func,db,config,datapath):
         with open(datapath,'r',encoding="utf-8") as datafile:
@@ -106,8 +106,7 @@ class FifoSend(Configuration):
         return open(config['filepath'],'w',encoding="utf-8")
     
     def writeFifo(self,fifo,data):
-        fifo.write(data)
-        
+        fifo.write(data)      
     
     def main(self,config,data):
         fifo=self.confFifo(config)

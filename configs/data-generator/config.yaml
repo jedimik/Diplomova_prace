@@ -1,5 +1,5 @@
 data:
-  dataFile: "exp_proud.csv"
+  dataFile: "generated.txt"
   generate: true
   outputName: "generated.txt"
   datalength: 20000
