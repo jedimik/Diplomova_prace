@@ -7,13 +7,11 @@ data:
   minvalue: 100
 
 database:
-  enabled: true
-  host: 'influxdb'
-  port: 8086
-  user: 'root'
-  pass: 'root'
+  bucket: <testovaci>
+  org: <testorganizace>
+  token: "Q4A2fwGUbKIO94rOzkI0DMKYo12BJorlntPhJxJ0vi-H6CkagJxGxrp8Y0gOoI844_9AQE3SE7HMAA-GZbv0Yg=="
+  url: http://localhost:8086
   database: 'diplomka'
 
 Predictor:
-  send: true
-  filepath: /fifo/dataIN
+  send: false

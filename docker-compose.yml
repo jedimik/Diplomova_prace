@@ -41,29 +41,6 @@ services:
     depends_on:
       - influxdb
 
-  kapacitor:
-  # Full tag list: https://hub.docker.com/r/library/kapacitor/tags/
-    build:
-      context: ./images/kapacitor/
-      #dockerfile: ./${TYPE}/Dockerfile
-      dockerfile: ./latest/Dockerfile
-      args:
-        KAPACITOR_TAG: latest
-    image: "kapacitor"
-    volumes:
-      # Mount for kapacitor data directory
-      - ./kapacitor/data/:/var/lib/kapacitor
-      # Mount for kapacitor configuration
-      - ./kapacitor/config/:/etc/kapacitor/
-    # Kapacitor requires network access to Influxdb
-    links:
-      - influxdb
-    depends_on:
-      - influxdb
-    ports:
-      # The API for Kapacitor is served on port 9092
-      - "9092:9092"
-
   chronograf:
     # Full tag list: https://hub.docker.com/r/library/chronograf/tags/
     build:
@@ -96,42 +73,41 @@ services:
     #image: "data_generator"
     volumes:
       - ./configs/data-generator:/app/config
-      - gen-pred:/fifo
     depends_on:
       - kapacitor
       - influxdb
 
-  predictor:
-    build:
-      context: ./data-predictor
-      dockerfile: ./Dockerfile
-    #image: "data_generator"
-    volumes:
-      - ./configs/data-predictor:/app/config
-      - gen-pred:/fifo
-    depends_on:
-      - generator
-      - influxdb
-
-  agent:
-    image: portainer/agent
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/volumes:/var/lib/docker/volumes
-
-  portainer:
-    image: portainer/portainer-ce
-    restart: always
-    ports:
-      - "9000:9000"
-    command: -H unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-
-volumes: 
-  gen-pred:
-  portainer_data:
+  #predictor:
+    #build:
+      #context: ./data-predictor
+      #dockerfile: ./Dockerfile
+    ##image: "data_generator"
+    #volumes:
+      #- ./configs/data-predictor:/app/config
+      #- gen-pred:/fifo
+    #depends_on:
+      #- generator
+      #- influxdb
+#
+  #agent:
+    #image: portainer/agent
+    #volumes:
+      #- /var/run/docker.sock:/var/run/docker.sock
+      #- /var/lib/docker/volumes:/var/lib/docker/volumes
+#
+  #portainer:
+    #image: portainer/portainer-ce
+    #restart: always
+    #ports:
+      #- "9000:9000"
+    #command: -H unix:///var/run/docker.sock
+    #volumes:
+      #- /var/run/docker.sock:/var/run/docker.sock
+      #- portainer_data:/data
+#
+#volumes: 
+  #gen-pred:
+  #portainer_data:
 
 
 

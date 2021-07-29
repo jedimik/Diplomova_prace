@@ -1,0 +1,10 @@
+{
+    "database":{
+        "bucket":"testovaci",
+        "org":"testorganizace",
+        "token":"v6aN4UHfnHoDAKMCVZ_uEH8BlGRCQ64GBCEorxYcYVqVJDBnUDUoc_UVGTGIjFjmMJNMA-luJfLGbyMV8pynyA==",
+        "url":"http://localhost:8086",
+        "database":"diplomka"
+    }
+
+}

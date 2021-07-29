@@ -5,11 +5,11 @@ import random
 import yaml
 import os
 import time
-import influxdb_client
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb import InfluxDBClient
 from datetime import datetime
 
-class Configuration(object):       
+class Configuration(object):
+        
     def load_config(self,filepath=None):    #Load config json or yaml
         filepath = filepath or "config/config.yaml"
         file, ext = os.path.splitext(filepath)
@@ -45,12 +45,15 @@ class LoadData(Configuration): # Load data for generating
     def load_data(self,func,config,datapath=None):
         dataConf=config['data']
         dbConf=config['database']
+        fifoConf=config['Predictor']
         db=DBconnect().LoadDB(dbConf)   
         if dataConf['generate']==True and datapath is None: #Generate new data and load them
             Generator().main(dataConf,datapath="data/")
-            return self.load_data_from_file(func,db,dbConf, datapath="data/"+dataConf['outputName']) 
+            return self.load_data_from_file(func,db,fifoConf, datapath="data/"+dataConf['outputName']) 
         elif dataConf['generate']==False and datapath is None: #Load data from datapath 
-             return self.load_data_from_file(func,db,dbConf, datapath="data/outputData") 
+             return self.load_data_from_file(func,db,fifoConf, datapath="data/outputData") 
+        elif not datapath: # Get data from stdin
+            return self.load_data_from_stdin(func,db,fifoConf)
         else:   
             pass
 
@@ -61,7 +64,9 @@ class LoadData(Configuration): # Load data for generating
                 func(line)
                 time.sleep(1)
                 #Send data DB
-                DBconnect.SendToDB(self,config,db,PreprocessData().Process(line,False))                 
+                DBconnect.SendToDB(self,db,PreprocessData().Process(line,False)) 
+                #Send to fifo
+                FifoSend().main(config,PreprocessData().Process(line,toStr=True))                    
 
     def load_data_from_stdin(self,func,db,config):
         for line in sys.stdin:
@@ -69,7 +74,9 @@ class LoadData(Configuration): # Load data for generating
             func(line)
             time.sleep(1)
             #Send data DB
-            DBconnect.SendToDB(self,config,db,PreprocessData().Process(line,False))        
+            DBconnect.SendToDB(self,db,PreprocessData().Process(line,False))     
+            #Send to fifo
+            FifoSend().main(config,PreprocessData().Process(line,toStr=True))     
 
     def start(self,config,datapath):
         def my_func(line):
@@ -80,17 +87,45 @@ class LoadData(Configuration): # Load data for generating
 class DBconnect(Configuration): 
     def LoadDB(self,config=None):    
         # establish connection to TnfluxDB
-        client = influxdb_client.InfluxDBClient(url=config["url"],token=config["token"],org=config["org"])
-        write_api = client.write_api(write_options=SYNCHRONOUS)
+        client = InfluxDBClient(config["host"], config["port"], config["user"], config["pass"], config["database"])
         # create database if it does not exist
-        return write_api
+        client.create_database(config["database"])
+        return client
 
-    def SendToDB(self,config,db,data):
-        db.write(bucket=config["bucket"],org=config["org"],record=data)    
+    def SendToDB(self,client,data):
+        client.write_points(data)
+
+class FifoSend(Configuration):
+    def confFifo(self,config): # For Predictor values
+        if(config['send']==True):
+            return self.openFifo(config)
+        else:
+            pass
+
+    def openFifo(self,config):   
+        return open(config['filepath'],'w',encoding="utf-8")
+    
+    def writeFifo(self,fifo,data):
+        fifo.write(data)      
+    
+    def main(self,config,data):
+        fifo=self.confFifo(config)
+        if fifo is not None:
+            return self.writeFifo(fifo,data)        
 
 class PreprocessData(Configuration):
     def Process(self,data,toStr=False):
-        #Lze nakonfigurovat, zatim test
-        data=influxdb_client.Point("testovaci_mereni").field("senzor1",float(data))
-        return data
+        utctime = datetime.utcnow().isoformat()[:-3]
+        json_body = [{
+            "measurement": "Temperature",
+            "time": utctime,
+            "fields": {
+            }
+        }]
+        field="Senzor1" #Simple for testing purposes
+        json_body[0]["fields"][field] = float(data)
+        if toStr:
+            return json.dumps(json_body) #For fifo
+        else:
+            return json_body #For dtb
         
