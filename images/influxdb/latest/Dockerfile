@@ -1,3 +1,2 @@
 ARG INFLUXDB_TAG
-FROM influxdb:1.7.11
-
+FROM influxdb:$INFLUXDB_TAG
