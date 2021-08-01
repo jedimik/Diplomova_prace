@@ -1,0 +1,8 @@
+{
+    "database":{
+        "bucket":"testbucket",
+        "org":"testorg",
+        "token":"mytoken",
+        "url":"http://influxdb:8086"
+    }
+}

@@ -37,4 +37,5 @@ if __name__=="__main__":
     cnf=cnf['database']
     print("tu")
     gen=Generate()
+    time.sleep(10) #wait for establishing influxdb
     gen.Start(config=cnf)
