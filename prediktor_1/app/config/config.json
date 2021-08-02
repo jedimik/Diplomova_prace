@@ -1,0 +1,18 @@
+{
+    "database":{
+        "bucket":"testbucket",
+        "org":"testorg",
+        "token":"mytoken",
+        "url":"http://localhost:8086"
+    },
+
+    "data":{
+        "time":"-20s",
+        "measurement":"mereni",
+        "field":"hodnota"        
+    },
+
+    "predictor":{
+        "multiply":1.15
+    }
+}
