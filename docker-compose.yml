@@ -41,12 +41,12 @@ services:
 
   predictor_1:
       build:
-          context: ./predictor1
+          context: ./predictor_1
           dockerfile: ./Dockerfile
       volumes:
-          - ./predictor1/app/config:/app/config
+          - ./predictor_1/app/config:/app/config
       depends_on:
           - influxdb
-          
+
 volumes:
   influxdbv2:
