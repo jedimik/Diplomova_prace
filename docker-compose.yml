@@ -38,5 +38,15 @@ services:
         - ./generator/app/config:/app/config
     depends_on:
         - influxdb
+
+  predictor_1:
+      build:
+          context: ./predictor1
+          dockerfile: ./Dockerfile
+      volumes:
+          - ./predictor1/app/config:/app/config
+      depends_on:
+          - influxdb
+          
 volumes:
   influxdbv2:
