@@ -1,10 +1,10 @@
 version: '3'
 services:
   influxdb:
-    image: quay.io/influxdb/influxdb:v2.0.3
+    image: quay.io/influxdb/influxdb:v2.0.7
     volumes:
       # Mount for influxdb data directory and configuration
-      - ./influxdb/data:/.influxdbv2
+      - ./influxdb/data:/root/.influxdbv2
     ports:
       - "8086:8086"
 
@@ -12,7 +12,7 @@ services:
   influxdb_cli:
     links:
       - influxdb
-    image: quay.io/influxdb/influxdb:v2.0.3
+    image: quay.io/influxdb/influxdb:v2.0.7
 # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
     entrypoint: influx setup --bucket testbucket -t mytoken -o testorg --username=username --password=password123 --host=http://influxdb:8086 -f
       # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service. 

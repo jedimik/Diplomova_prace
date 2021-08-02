@@ -3,7 +3,7 @@
         "bucket":"testbucket",
         "org":"testorg",
         "token":"mytoken",
-        "url":"http://localhost:8086"
+        "url":"http://influxdb:8086"
     },
 
     "data":{

@@ -60,7 +60,7 @@ class Process():
 
 if __name__=="__main__":    
     cnf=Configuration().load_config()
-    #time.sleep(10) #wait for database
+    time.sleep(10) #wait for database
     pred=Process()
     while True:
         pred.Predict(cnf)
