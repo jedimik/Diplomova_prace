@@ -25,7 +25,13 @@ class Generate():
         write_api = client.write_api(write_options=SYNCHRONOUS)
         while True:
             time.sleep(1)
-            number=random.randint(100,150)
+            prom=random.randint(0,20)
+            if prom == 1:
+                number = random.randint(200,300)
+            elif prom == 2:
+                number = random.randint(0,-100)
+            else:
+                number=random.randint(100,150)
             print("Generuju: ",number)
             data=influxdb_client.Point("mereni").field("hodnota",number)
             write_api.write(bucket=config["bucket"],org=config["org"],record=data)                       

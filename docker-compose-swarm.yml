@@ -1,0 +1,72 @@
+version: '3.5'
+services:
+    influxdb:
+        image: quay.io/influxdb/influxdb:v2.0.7
+        volumes:
+          # Mount for influxdb data directory and configuration
+          - ./influxdb/data:/root/.influxdbv2
+        ports:
+          - "8086:8086"
+    
+    # Use the influx cli to set up an influxdb instance. 
+    influxdb_cli:
+        image: quay.io/influxdb/influxdb:v2.0.7
+        entrypoint: influx setup --bucket mainbucket -t mytoken -o testorg --username=username --password=password123 --host=http://influxdb:8086 -f
+          # Initial setup, can be done more safely
+        restart: on-failure:10
+        depends_on:
+          - influxdb
+
+    telegraf:
+        image: telegraf
+        volumes:
+            # Mount for telegraf config
+            - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+        depends_on:
+            - influxdb
+
+    generator:
+        image: jedimik/delp_generator:latest
+        volumes:
+            - ./generator/app/config:/app/config
+        configs:
+            - source: generator_conf
+              target: /app/config/config.json
+        depends_on:
+            - influxdb
+
+    predictor_1:
+        image: jedimik/delp_predictor:latest
+        volumes:
+            - ./predictor_1/app/config:/app/config
+        configs:
+            - source: predictor_conf
+              target: /app/config/config.json
+        depends_on:
+            - influxdb
+
+    agent:
+        image: portainer/agent
+        volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /var/lib/docker/volumes:/var/lib/docker/volumes
+
+    portainer:
+        image: portainer/portainer-ce
+        ports:
+        - "9000:9000"
+        command: -H unix:///var/run/docker.sock
+        volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - portainer_data:/data
+#For changing configs in portainer
+configs:
+    generator_conf:
+        file: ./generator/app/config/config.json
+    predictor_conf:
+        file: ./predictor_1/app/config/config.json
+
+volumes:
+    influxdbv2:  
+    gen-pred:
+    portainer_data:

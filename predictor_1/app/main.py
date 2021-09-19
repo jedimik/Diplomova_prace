@@ -6,8 +6,8 @@ import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 class Configuration(object):      
-    def load_config(self,filepath=None):    
-        filepath = filepath or "config/config.json"
+    def load_config(self):    
+        filepath = "config/config.json"
         file, ext = os.path.splitext(filepath)
         if ext==".json":
             return self.load_config_json(filepath)  

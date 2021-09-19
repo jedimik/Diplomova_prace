@@ -1,6 +1,6 @@
 {
     "database":{
-        "bucket":"testbucket",
+        "bucket":"mainbucket",
         "org":"testorg",
         "token":"mytoken",
         "url":"http://influxdb:8086"
