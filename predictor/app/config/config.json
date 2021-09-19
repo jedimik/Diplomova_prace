@@ -4,30 +4,42 @@
         "org":"testorg",
         "token":"mytoken",
         "url":"http://influxdb:8086",
+        "urlLocal":"http://localhost:8086",
         "measurementName":"mereni",
         "fieldName":"hodnota"
     },
 
-    "learndata":{
-        "time":"-20s",
+    "learnData":{
+        "bucket":"mainbucket",
+        "time":"-50m",
         "measurement":"mereni",
-        "field":"hodnota"        
+        "field":"hodnota",
+        "lowPercentile":20,
+        "highPercentile":80        
     },
 
-    "sendDB":{
+    "predictData":{
+        "bucket":"mainbucket",
+        "time":"-1s",
+        "measurement":"mereni",
+        "field":"hodnota"
+    },
+
+    "predictDB":{
         "bucket":"mainbucket",
         "org":"testorg",
         "token":"mytoken",
-        "url":"http://influxdb:8086"
+        "url":"http://influxdb:8086",
+        "urlLocal":"http://localhost:8086"
     },
 
-    "senddata":{
-        "time":"-20s",
-        "measurement":"mereni",
-        "field":"hodnota"        
-    },
-
-    "predictor":{
-        "multiply":1.15
+    "sendData":{
+        "org":"testorg",
+        "token":"mytoken",
+        "url":"http://influxdb:8086",
+        "urlLocal":"http://localhost:8086",
+        "bucket":"mainbucket",
+        "measurementName":"predikce_main8",
+        "fieldName":"allert"        
     }
 }

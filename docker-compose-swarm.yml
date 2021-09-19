@@ -35,10 +35,10 @@ services:
         depends_on:
             - influxdb
 
-    predictor_1:
+    predictor:
         image: jedimik/delp_predictor:latest
         volumes:
-            - ./predictor_1/app/config:/app/config
+            - ./predictor/app/config:/app/config
         configs:
             - source: predictor_conf
               target: /app/config/config.json
@@ -64,7 +64,7 @@ configs:
     generator_conf:
         file: ./generator/app/config/config.json
     predictor_conf:
-        file: ./predictor_1/app/config/config.json
+        file: ./predictor/app/config/config.json
 
 volumes:
     influxdbv2:  

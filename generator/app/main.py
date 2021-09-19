@@ -24,7 +24,7 @@ class Generate():
         )
         write_api = client.write_api(write_options=SYNCHRONOUS)
         while True:
-            time.sleep(1)
+            time.sleep(0.1)
             prom=random.randint(0,20)
             if prom == 1:
                 number = random.randint(200,300)
