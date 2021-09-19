@@ -1,3 +1,2 @@
 influxdb-client
 numpy
-scipy

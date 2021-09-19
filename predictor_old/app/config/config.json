@@ -13,7 +13,9 @@
         "bucket":"mainbucket",
         "time":"-50m",
         "measurement":"mereni",
-        "field":"hodnota"      
+        "field":"hodnota",
+        "lowPercentile":20,
+        "highPercentile":80        
     },
 
     "predictData":{
@@ -37,7 +39,7 @@
         "url":"http://influxdb:8086",
         "urlLocal":"http://localhost:8086",
         "bucket":"mainbucket",
-        "measurementName":"predikce_main",
+        "measurementName":"predikce_main8",
         "fieldName":"allert"        
     }
 }
